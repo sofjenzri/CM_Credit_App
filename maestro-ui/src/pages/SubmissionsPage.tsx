@@ -144,9 +144,9 @@ const SubmissionsPage: React.FC = () => {
   }, [cases]);
 
   const statusDistributionData = useMemo(() => {
-    const running = groupCount('running');
-    const completed = groupCount('completed');
-    const faulted = groupCount('faulted');
+    const running = cases.filter((item) => groupForStatus(item.status) === 'running').length;
+    const completed = cases.filter((item) => groupForStatus(item.status) === 'completed').length;
+    const faulted = cases.filter((item) => groupForStatus(item.status) === 'faulted').length;
     return [
       { name: 'En cours', value: running, color: '#06b6d4' },
       { name: 'Achevés', value: completed, color: '#10b981' },

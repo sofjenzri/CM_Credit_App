@@ -40,10 +40,19 @@ const LoanRequestPage: React.FC = () => {
   const [error, setError] = useState('');
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value, type } = e.target as any;
+    const { name, value } = e.target;
+
+    if (e.target instanceof HTMLInputElement && e.target.type === 'checkbox') {
+      setFormData({
+        ...formData,
+        [name]: e.target.checked,
+      });
+      return;
+    }
+
     setFormData({
       ...formData,
-      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value,
+      [name]: value,
     });
   };
 
@@ -385,7 +394,7 @@ const InputField: React.FC<{
   label: string;
   type?: string;
   name: string;
-  value: any;
+  value: string | number;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   required?: boolean;
 }> = ({ label, type = 'text', name, value, onChange, required }) => (

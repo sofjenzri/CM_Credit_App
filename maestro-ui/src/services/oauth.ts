@@ -51,8 +51,44 @@ export const clearAuthStorage = () => {
   sessionStorage.removeItem(OAUTH_STATE_KEY);
 };
 
-export const isAuthenticated = () => {
-  return Boolean(localStorage.getItem(UIPATH_ACCESS_TOKEN_KEY) || localStorage.getItem(AUTH_TOKEN_KEY));
+const decodeJwtPayload = (token: string): Record<string, unknown> | null => {
+  try {
+    return JSON.parse(atob(token.split('.')[1]));
+  } catch {
+    return null;
+  }
+};
+
+export const isAuthenticated = (): boolean => {
+  const token = localStorage.getItem(UIPATH_ACCESS_TOKEN_KEY) || localStorage.getItem(AUTH_TOKEN_KEY);
+  if (!token) return false;
+  const payload = decodeJwtPayload(token);
+  if (payload) {
+    const exp = payload.exp as number | undefined;
+    if (exp && Date.now() / 1000 > exp) {
+      clearAuthStorage();
+      return false;
+    }
+  }
+  return true;
+};
+
+export const getAuthenticatedUser = (): { name: string; initials: string; email: string } | null => {
+  const token = localStorage.getItem(UIPATH_ACCESS_TOKEN_KEY) || localStorage.getItem(AUTH_TOKEN_KEY);
+  if (!token) return null;
+  const payload = decodeJwtPayload(token);
+  if (!payload) return null;
+  const name =
+    (payload.name as string) ||
+    (payload.given_name as string) ||
+    (payload.sub as string) ||
+    'Utilisateur';
+  const email = (payload.email as string) || '';
+  const parts = name.trim().split(/\s+/);
+  const initials = parts.length >= 2
+    ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+    : name.slice(0, 2).toUpperCase();
+  return { name, initials, email };
 };
 
 export const startOAuthLogin = async () => {

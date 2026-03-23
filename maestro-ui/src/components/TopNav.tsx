@@ -1,10 +1,13 @@
 import React from 'react';
 import { Bell, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { clearAuthStorage } from '../services/oauth';
+import { clearAuthStorage, getAuthenticatedUser } from '../services/oauth';
 
 const TopNav: React.FC = () => {
   const navigate = useNavigate();
+  const user = getAuthenticatedUser();
+  const displayName = user?.name ?? 'Utilisateur';
+  const initials = user?.initials ?? 'UT';
 
   return (
     <header className="portal-topnav bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
@@ -37,7 +40,7 @@ const TopNav: React.FC = () => {
         {/* User Menu */}
         <div className="portal-topnav-user">
           <div className="text-right hidden sm:block">
-            <p className="text-sm font-semibold text-slate-900">Julien Martin</p>
+            <p className="text-sm font-semibold text-slate-900">{displayName}</p>
             <p className="text-xs text-slate-500">Conseiller bancaire</p>
           </div>
           <button
@@ -47,7 +50,7 @@ const TopNav: React.FC = () => {
             }}
             className="portal-topnav-avatar bg-gradient-to-br from-[#1fa3b3] to-[#157a99] flex items-center justify-center text-white font-bold text-lg hover:shadow-lg transition-all duration-250 hover:scale-105"
           >
-            JU
+            {initials}
           </button>
         </div>
       </div>

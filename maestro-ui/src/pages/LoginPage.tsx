@@ -20,7 +20,7 @@ const LoginPage: React.FC = () => {
 
     try {
       await startOAuthLogin();
-    } catch (_err) {
+    } catch {
       setError('Impossible de démarrer la connexion OAuth UiPath.');
       setIsLoading(false);
     } finally {

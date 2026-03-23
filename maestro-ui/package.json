@@ -10,9 +10,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@uipath/uipath-typescript": "^1.1.3",
     "axios": "^1.13.6",
-    "lucide-react": "^0.330.0",
+    "lucide-react": "^0.469.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-router-dom": "^6.30.3",

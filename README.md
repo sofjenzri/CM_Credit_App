@@ -1,12 +1,12 @@
 Voici les commandes pour lancer le backend et le frontend Maestro UI :
 
 1. Lancer le backend
-        cd /Users/ludovic.duverger/Projets/CM_Credit_APPV2/backend
+        cd ./backend
         npm install
         npm run dev
 
 2. Lancer le frontend (Maestro UI)
-cd /Users/ludovic.duverger/Projets/CM_Credit_APPV2/maestro-ui
+cd ./maestro-ui
         npm install
         npm run dev
 

@@ -128,6 +128,7 @@ export const fetchUiPathData = async (token) => {
     id: context.instanceId,
     caseId: context.caseId,
     processKey: context.processKey,
+    processVersion: context.processVersion || '',
     status: context.status,
     currentStage: context.currentStage || '-',
     clientName: findRecordValueByKey(context.mainCaseRecord || {}, 'Name', ['FullName', 'ClientName']) || '-',

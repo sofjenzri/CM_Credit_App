@@ -29,37 +29,32 @@ const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-dark flex items-center justify-center p-4">
-      <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 items-center gap-8 lg:gap-16">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 flex items-center justify-center p-8">
+      <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 items-center gap-12 lg:gap-20">
         {/* Left: Branding */}
-        <div className="hidden lg:flex flex-col justify-center space-y-12 text-white">
-          <div className="space-y-6">
-            <div className="space-y-3">
-              <div className="flex items-center space-x-3">
-                <div className="w-14 h-14 bg-gradient-brand rounded-2xl flex items-center justify-center font-bold text-2xl text-white">
-                  CM
-                </div>
-              </div>
-              <h1 className="text-5xl font-bold leading-tight">
-                Credit Management <span className="text-brand-500">Platform</span>
-              </h1>
-            </div>
-            <p className="text-xl text-slate-300 leading-relaxed">
+        <div className="hidden lg:flex flex-col justify-center" style={{ gap: '56px' }}>
+          <div className="flex flex-col" style={{ gap: '7px' }}>
+            <h1 className="text-4xl font-bold leading-tight text-slate-900">
+              Credit Management <span style={{ color: '#ee7728' }}>Platform</span>
+            </h1>
+            <p className="text-lg text-slate-500 leading-relaxed">
               Modern credit underwriting and loan processing for the digital age.
             </p>
           </div>
 
-          <div className="space-y-6">
+          <div className="flex flex-col" style={{ gap: '40px' }}>
             {[
               { icon: '📊', title: 'Real-time Analytics', desc: 'Track submissions and metrics in real-time' },
               { icon: '🔒', title: 'Enterprise Security', desc: 'Bank-grade encryption and compliance' },
               { icon: '⚡', title: 'Fast Processing', desc: 'Streamlined workflow from application to approval' },
             ].map((feature, idx) => (
-              <div key={idx} className="flex items-start space-x-4">
-                <div className="text-3xl mt-1">{feature.icon}</div>
+              <div key={idx} className="flex items-center space-x-4">
+                <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center text-xl flex-shrink-0">
+                  {feature.icon}
+                </div>
                 <div>
-                  <h3 className="font-semibold text-lg">{feature.title}</h3>
-                  <p className="text-slate-400 text-sm">{feature.desc}</p>
+                  <h3 className="font-semibold text-slate-800">{feature.title}</h3>
+                  <p className="text-slate-500 text-sm">{feature.desc}</p>
                 </div>
               </div>
             ))}
@@ -68,22 +63,21 @@ const LoginPage: React.FC = () => {
 
         {/* Right: Login Form */}
         <div className="w-full max-w-md mx-auto lg:mx-0">
-          <div className="bg-white rounded-2xl shadow-xl p-8 space-y-8 animate-slide-in-up">
-            <div className="space-y-3">
+          <div className="bg-white rounded-3xl animate-slide-in-up flex flex-col" style={{ boxShadow: '0 8px 40px rgba(0,0,0,0.08)', padding: '56px', gap: '48px' }}>
+            <div>
               <h2 className="text-3xl font-bold text-slate-900">Connexion</h2>
-              <p className="text-slate-600">Authentification sécurisée OAuth UiPath (PKCE)</p>
             </div>
 
             {error && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start space-x-3 animate-fade-in">
-                <AlertCircle size={20} className="text-red-600 flex-shrink-0 mt-0.5" />
-                <p className="text-sm text-red-700">{error}</p>
+              <div className="bg-red-50 border border-red-100 rounded-xl p-4 flex items-start space-x-3 animate-fade-in">
+                <AlertCircle size={18} className="text-red-500 flex-shrink-0 mt-0.5" />
+                <p className="text-sm text-red-600">{error}</p>
               </div>
             )}
 
-            <div className="space-y-5">
-              <div className="p-4 rounded-xl bg-cyan-50 border border-cyan-100 text-cyan-800 text-sm flex items-start gap-3">
-                <ShieldCheck size={18} className="mt-0.5" />
+            <div className="flex flex-col" style={{ gap: '24px' }}>
+              <div className="p-5 rounded-xl bg-slate-50 border border-slate-100 text-slate-500 text-sm flex items-start gap-3">
+                <ShieldCheck size={16} className="text-slate-400 flex-shrink-0 mt-0.5" />
                 <p>
                   Tu vas être redirigé vers UiPath Identity pour te connecter, puis revenir automatiquement sur le portail.
                 </p>
@@ -93,15 +87,16 @@ const LoginPage: React.FC = () => {
                 type="button"
                 onClick={handleOAuthSignIn}
                 disabled={isLoading}
-                className="w-full bg-gradient-brand text-white font-semibold py-3 rounded-lg hover:shadow-lg transition-all duration-250 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 group"
+                className="w-full text-white font-semibold rounded-xl hover:shadow-lg hover:opacity-90 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 group text-base"
+                style={{ background: 'linear-gradient(135deg, #ee7728 0%, #f19250 100%)', padding: '21px 24px' }}
               >
                 <span>{isLoading ? 'Redirection OAuth...' : 'Se connecter avec UiPath OAuth'}</span>
-                <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
               </button>
             </div>
 
-            <div className="text-center text-sm text-slate-600 border-t border-slate-200 pt-6">
-              <p>Accès sécurisé via OAuth2 + PKCE</p>
+            <div className="text-center text-xs text-slate-400 border-t border-slate-100" style={{ paddingTop: '32px' }}>
+              <p>Accès sécurisé via OAuth2</p>
             </div>
           </div>
         </div>

@@ -1,11 +1,13 @@
 import React from 'react';
 import { Bell, Search } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { clearAuthStorage, getAuthenticatedUser } from '../services/oauth';
 
 const TopNav: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const user = getAuthenticatedUser();
+  const portalLabel = (location.pathname === '/submissions' || location.pathname.startsWith('/cases/')) ? 'Portail Analyste Crédit' : 'Portail Conseiller';
   const displayName = user?.name ?? 'Utilisateur';
   const initials = user?.initials ?? 'UT';
 
@@ -13,7 +15,7 @@ const TopNav: React.FC = () => {
     <header className="portal-topnav bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
       {/* Left: Title */}
       <div className="portal-topnav-left flex items-center space-x-4">
-        <span className="text-sm text-slate-500 hidden md:block">Portail conseiller</span>
+        <span className="text-sm text-slate-500 hidden md:block">{portalLabel}</span>
       </div>
 
       {/* Right: Actions */}

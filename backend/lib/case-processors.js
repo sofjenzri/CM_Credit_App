@@ -21,6 +21,25 @@ import {
 const CASE_TRIGGER_NODE_TYPE = 'case-management:Trigger';
 const CASE_NOT_STARTED_STATUS = 'Not Started';
 
+const buildMaestroAdminUrl = (instanceId, folderKey = '') => {
+  const baseUrl = String(uiPathConfig.baseUrl || '').replace(/\/+$/, '');
+  const orgName = String(uiPathConfig.orgName || '').trim();
+  const tenantName = String(uiPathConfig.tenantName || '').trim();
+  const caseModelId = String(uiPathConfig.targetCaseModelId || '').trim();
+  const resolvedInstanceId = String(instanceId || '').trim();
+  const resolvedFolderKey = String(uiPathConfig.folderKey || folderKey || '').trim();
+
+  if (!baseUrl || !orgName || !tenantName || !caseModelId || !resolvedInstanceId) return '';
+
+  const url = new URL(
+    `${baseUrl}/${encodeURIComponent(orgName)}/${encodeURIComponent(tenantName)}/maestro_/cases/${encodeURIComponent(caseModelId)}/instances/${encodeURIComponent(resolvedInstanceId)}`,
+  );
+  if (resolvedFolderKey) {
+    url.searchParams.set('folderKey', resolvedFolderKey);
+  }
+  return url.toString();
+};
+
 const toTimestamp = (value) => {
   if (!value) return 0;
   const parsed = new Date(value);
@@ -261,6 +280,11 @@ export const enrichInstanceWithMainCase = (instance, mainCaseRecords, mainCaseIn
     getStringField(instance, ['startedTime', 'createdTime', 'createdAt', 'creationTime', 'startTime', 'startedAt', 'openedAt']) ||
     findValueByKeyTokens(instance, ['started', 'created', 'creation', 'opened', 'start']);
   const instanceProcessRef = getStringField(instance, ['processInstanceId', 'workflowInstanceId']);
+  const processVersion =
+    cleanPlaceholder(getStringField(instance, ['version', 'processVersion', 'packageVersion', 'workflowVersion'])) ||
+    cleanPlaceholder(getStringField(instance?.caseAppConfig || {}, ['version', 'processVersion', 'packageVersion'])) ||
+    cleanPlaceholder(findValueByKeyTokens(instance, ['processversion', 'packageversion', 'workflowversion', 'version'])) ||
+    '';
 
   const candidates = [instanceId, instanceCaseRef, displayName, instanceProcessRef].map(normalizeToken).filter(Boolean);
   let matchedMainCase = candidates.map((candidate) => mainCaseIndex.get(candidate)).find(Boolean);
@@ -310,6 +334,7 @@ export const enrichInstanceWithMainCase = (instance, mainCaseRecords, mainCaseIn
     instanceId,
     instance,
     processKey: getStringField(instance, ['processKey', 'processDefinitionKey']) || uiPathConfig.targetProcessKey,
+    processVersion,
     status: getStringField(instance, ['latestRunStatus', 'status']) || 'Unknown',
     caseId,
     folderKey,
@@ -415,6 +440,7 @@ export const mapCaseDetail = (instanceContext, allDocumentRecords, documentsEnti
     caseId: instanceContext.caseId,
     folderKey: uiPathConfig.folderKey || instanceContext.folderKey || '',
     processKey: instanceContext.processKey,
+    processVersion: instanceContext.processVersion || '',
     status: instanceContext.status,
     currentStage: instanceContext.currentStage || '',
     createdTime: instanceContext.createdTime || '',
@@ -443,6 +469,7 @@ export const mapCaseDetail = (instanceContext, allDocumentRecords, documentsEnti
       paymentDate: findRecordValueByKey(record, 'PaymentDate', ['DisbursementDate']),
     },
     documents,
+    adminUrl: buildMaestroAdminUrl(instanceContext.instanceId, instanceContext.folderKey),
     executionHistory: instanceContext.executionHistory || null,
   };
 };

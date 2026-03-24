@@ -2,6 +2,7 @@ export interface CaseListItem {
   id: string;
   caseId: string;
   processKey?: string;
+  processVersion?: string;
   status: string;
   currentStage?: string;
   clientName?: string;
@@ -67,7 +68,9 @@ export interface CaseDetail {
   id: string;
   caseId: string;
   folderKey?: string;
+  adminUrl?: string;
   processKey?: string;
+  processVersion?: string;
   status?: string;
   currentStage?: string;
   createdTime?: string;

@@ -11,7 +11,6 @@ import {
   LogOut,
   Menu,
   X,
-  Plus,
 } from 'lucide-react';
 import { clearAuthStorage } from '../services/oauth';
 
@@ -19,6 +18,7 @@ const Sidebar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(true);
   const location = useLocation();
   const navigate = useNavigate();
+  const portalLabel = (location.pathname === '/submissions' || location.pathname.startsWith('/cases/')) ? 'Portail Analyste Crédit' : 'Portail Conseiller';
 
   const navItems = [
     { path: '/dashboard', icon: LayoutDashboard, label: 'Tableau de bord' },
@@ -49,19 +49,19 @@ const Sidebar: React.FC = () => {
       >
         {/* Logo Section */}
         <div className="h-20 flex items-center px-5 border-b border-[#1e3a4a] bg-[#0d1b26]">
-          <Link to="/dashboard" className="flex items-center gap-3 w-full hover:opacity-80 transition-opacity">
+          <Link to="/dashboard" className="flex items-center gap-3 w-full hover:opacity-80 transition-opacity" style={{ paddingLeft: '8px' }}>
             <div className="w-10 h-10 bg-gradient-to-br from-[#1fa3b3] to-[#157a99] rounded-xl flex items-center justify-center font-bold text-base text-white shadow-lg">
-              CM
+              Ui
             </div>
             <div className="flex flex-col">
-              <span className="font-bold text-base leading-tight">CM Crédit</span>
-              <span className="text-xs text-[#9dc6d3] font-medium">Portail Conseiller</span>
+              <span className="font-bold text-base leading-tight">UiBank</span>
+              <span className="text-xs text-[#9dc6d3] font-medium">{portalLabel}</span>
             </div>
           </Link>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-1 scrollbar-hide">
+        <nav className="flex-1 overflow-y-auto scrollbar-hide flex flex-col" style={{ padding: '16px 12px', gap: '6px' }}>
           {navItems.map((item) => {
             const Icon = item.icon;
             const active = isActive(item.path);
@@ -69,7 +69,8 @@ const Sidebar: React.FC = () => {
               <Link
                 key={item.path}
                 to={item.path}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-250 group relative ${
+                style={{ padding: '11px 16px' }}
+                className={`flex items-center gap-3 rounded-xl transition-all duration-250 group relative ${
                   active
                     ? 'bg-[#1fa3b3]/20 text-[#8de6f1] shadow-lg border border-[#1fa3b3]/40'
                     : 'text-[#c8e0e8] hover:text-white hover:bg-[#1e3a4a]/70'
@@ -88,37 +89,29 @@ const Sidebar: React.FC = () => {
           })}
         </nav>
 
-        <div className="px-4 pb-4">
-          <button
-            onClick={() => navigate('/new-request')}
-            className="w-full rounded-xl bg-[#ff4d14] text-white px-4 py-3 font-semibold flex items-center justify-center gap-2 hover:bg-[#ff6333] transition-colors"
-          >
-            <Plus size={16} />
-            Nouveau dossier
-          </button>
-        </div>
-
         {/* Divider */}
         <div className="h-px bg-[#1e3a4a] mx-4" />
 
         {/* Footer Section */}
-        <div className="p-4 space-y-2.5">
+        <div className="flex flex-col" style={{ padding: '12px 16px', gap: '8px' }}>
           <Link
             to="/settings"
-            className="flex items-center gap-3.5 px-4 py-3.5 text-[#c8e0e8] hover:text-white hover:bg-[#1e3a4a]/70 rounded-lg transition-all duration-250 group"
+            className="flex items-center gap-3.5 rounded-lg transition-all duration-250 group text-[#c8e0e8] hover:text-white hover:bg-[#1e3a4a]/70"
+            style={{ padding: '10px 20px' }}
           >
             <Settings size={20} className="group-hover:text-[#1fa3b3] transition-colors" />
-            <span className="font-medium text-[15px]">Settings</span>
+            <span className="font-medium text-[15px]">Paramètres</span>
           </Link>
           <button
             onClick={() => {
               clearAuthStorage();
               navigate('/login');
             }}
-            className="w-full flex items-center gap-3.5 px-4 py-3.5 text-[#c8e0e8] hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-all duration-250 group"
+            className="w-full flex items-center gap-3.5 rounded-lg transition-all duration-250 group text-[#c8e0e8] hover:text-red-300 hover:bg-red-500/10"
+            style={{ padding: '10px 20px' }}
           >
             <LogOut size={20} className="group-hover:text-red-300 transition-colors" />
-            <span className="font-medium text-[15px]">Logout</span>
+            <span className="font-medium text-[15px]">Déconnexion</span>
           </button>
         </div>
       </aside>

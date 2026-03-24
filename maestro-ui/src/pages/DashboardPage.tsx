@@ -64,7 +64,8 @@ const DashboardPage: React.FC = () => {
         </div>
         <button
           onClick={() => navigate('/new-request')}
-          className="bg-[#ff4d14] text-white rounded-xl px-4 py-2.5 flex items-center hover:bg-[#ff6333] transition-colors"
+          className="text-white rounded-xl flex items-center gap-3 font-bold text-lg hover:opacity-90 transition-all"
+          style={{ background: 'linear-gradient(135deg, #ee7728 0%, #f19250 100%)', padding: '15px 36px' }}
         >
           <Plus size={16} />
           Nouveau dossier
@@ -73,7 +74,7 @@ const DashboardPage: React.FC = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {cards.map((card) => (
-          <div key={card.title} className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all">
+          <div key={card.title} className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all">
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-xs text-slate-500">{card.title}</p>
@@ -109,14 +110,14 @@ const DashboardPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm" style={{ padding: '12px' }}>
           <div className="flex items-center justify-between">
             <h2 className="font-bold text-slate-900 text-sm">Activité du jour</h2>
             <CalendarDays size={14} className="text-slate-400" />
           </div>
-          <div className="mt-3 space-y-2">
+          <div className="flex flex-col" style={{ marginTop: '8px', gap: '5px' }}>
             {transfers.map((entry) => (
-              <div key={entry.label + entry.source} className="flex items-center gap-2.5 p-2.5 rounded-xl border border-slate-100 bg-slate-50">
+              <div key={entry.label + entry.source} className="flex items-center gap-2.5 rounded-xl border border-slate-100 bg-slate-50" style={{ padding: '6px 7px' }}>
                 <div className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 ${entry.trend === 'up' ? 'bg-emerald-100 text-emerald-600' : 'bg-amber-100 text-amber-600'}`}>
                   {entry.trend === 'up' ? <ArrowUpRight size={13} /> : <ArrowDownRight size={13} />}
                 </div>

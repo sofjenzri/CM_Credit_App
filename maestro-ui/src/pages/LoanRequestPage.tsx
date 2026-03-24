@@ -17,7 +17,7 @@ const LoanRequestPage: React.FC = () => {
     requestedAmount: 25000,
     durationMonths: 60,
     creditType: 'Prêt personnel',
-    loanPurpose: 'Home renovation',
+    loanPurpose: 'Rénovation immobilière',
     otherIncome: 0,
     debtRatio: 12,
     netIncome: 3500,
@@ -143,8 +143,8 @@ const LoanRequestPage: React.FC = () => {
     <div className="loan-form-page">
       {/* Header */}
       <div className="space-y-3">
-        <h1 className="text-4xl font-bold text-slate-900">New Loan Application</h1>
-        <p className="text-slate-600 text-lg">Complete the form below to submit your credit application</p>
+        <h1 className="text-3xl font-bold text-slate-900">Nouvelle demande de crédit</h1>
+        <p className="text-slate-600 text-lg">Complétez le formulaire ci-dessous pour soumettre votre demande de crédit</p>
       </div>
 
       {/* Alerts */}
@@ -152,7 +152,7 @@ const LoanRequestPage: React.FC = () => {
         <div className="mb-8 bg-red-50 border border-red-200 rounded-lg p-4 flex items-start space-x-3 animate-slide-in-up">
           <AlertCircle size={20} className="text-red-600 flex-shrink-0 mt-0.5" />
           <div>
-            <p className="font-semibold text-red-900">Error</p>
+            <p className="font-semibold text-red-900">Erreur</p>
             <p className="text-sm text-red-700">{error}</p>
           </div>
         </div>
@@ -162,8 +162,8 @@ const LoanRequestPage: React.FC = () => {
         <div className="mb-8 bg-green-50 border border-green-200 rounded-lg p-4 flex items-start space-x-3 animate-slide-in-up">
           <CheckCircle size={20} className="text-green-600 flex-shrink-0 mt-0.5" />
           <div>
-            <p className="font-semibold text-green-900">Success!</p>
-            <p className="text-sm text-green-700">{successMessage || 'Application submitted.'}</p>
+            <p className="font-semibold text-green-900">Succès !</p>
+            <p className="text-sm text-green-700">{successMessage || 'Demande soumise.'}</p>
           </div>
         </div>
       )}
@@ -176,12 +176,12 @@ const LoanRequestPage: React.FC = () => {
             <div className="w-11 h-11 bg-brand-100 rounded-lg flex items-center justify-center shrink-0">
               <User size={20} className="text-brand-600" />
             </div>
-            <h2 className="text-2xl font-bold text-slate-900">Personal Information</h2>
+            <h2 className="text-2xl font-bold text-slate-900">Informations personnelles</h2>
           </div>
 
           <div className="loan-grid">
             <InputField
-              label="Full Name"
+              label="Nom complet"
               name="fullName"
               value={formData.fullName}
               onChange={handleInputChange}
@@ -196,7 +196,7 @@ const LoanRequestPage: React.FC = () => {
               required
             />
             <InputField
-              label="Phone"
+              label="Téléphone"
               type="tel"
               name="phone"
               value={formData.phone}
@@ -212,12 +212,12 @@ const LoanRequestPage: React.FC = () => {
             <div className="w-11 h-11 bg-blue-100 rounded-lg flex items-center justify-center shrink-0">
               <DollarSign size={20} className="text-blue-600" />
             </div>
-            <h2 className="text-2xl font-bold text-slate-900">Loan Details</h2>
+            <h2 className="text-2xl font-bold text-slate-900">Détails du prêt</h2>
           </div>
 
           <div className="loan-grid">
             <InputField
-              label="Requested Amount (€)"
+              label="Montant demandé (€)"
               type="number"
               name="requestedAmount"
               value={formData.requestedAmount}
@@ -225,7 +225,7 @@ const LoanRequestPage: React.FC = () => {
               required
             />
             <InputField
-              label="Duration (months)"
+              label="Durée (mois)"
               type="number"
               name="durationMonths"
               value={formData.durationMonths}
@@ -233,14 +233,14 @@ const LoanRequestPage: React.FC = () => {
               required
             />
             <SelectField
-              label="Credit Type"
+              label="Type de crédit"
               name="creditType"
               value={formData.creditType}
               onChange={handleInputChange}
               options={['Prêt personnel', 'Prêt auto', 'Prêt immobilier']}
             />
             <InputField
-              label="Purpose"
+              label="Objet du prêt"
               name="loanPurpose"
               value={formData.loanPurpose}
               onChange={handleInputChange}
@@ -254,12 +254,12 @@ const LoanRequestPage: React.FC = () => {
             <div className="w-11 h-11 bg-amber-100 rounded-lg flex items-center justify-center shrink-0">
               <Calendar size={20} className="text-amber-600" />
             </div>
-            <h2 className="text-2xl font-bold text-slate-900">Financial Information</h2>
+            <h2 className="text-2xl font-bold text-slate-900">Informations financières</h2>
           </div>
 
           <div className="loan-grid">
             <InputField
-              label="Net Monthly Income (€)"
+              label="Revenu mensuel net (€)"
               type="number"
               name="netIncome"
               value={formData.netIncome}
@@ -267,7 +267,7 @@ const LoanRequestPage: React.FC = () => {
               required
             />
             <InputField
-              label="Monthly Charges (€)"
+              label="Charges mensuelles (€)"
               type="number"
               name="monthlyCharges"
               value={formData.monthlyCharges}
@@ -275,7 +275,7 @@ const LoanRequestPage: React.FC = () => {
               required
             />
             <InputField
-              label="Bank Name"
+              label="Nom de la banque"
               name="bankName"
               value={formData.bankName}
               onChange={handleInputChange}
@@ -295,13 +295,13 @@ const LoanRequestPage: React.FC = () => {
             <div className="w-11 h-11 bg-purple-100 rounded-lg flex items-center justify-center shrink-0">
               <Upload size={20} className="text-purple-600" />
             </div>
-            <h2 className="text-2xl font-bold text-slate-900">Supporting Documents</h2>
+            <h2 className="text-2xl font-bold text-slate-900">Pièces justificatives</h2>
           </div>
 
           <div className="loan-upload-box text-center hover:border-brand-500 transition-colors duration-250 hover:bg-brand-50">
             <Upload size={32} className="mx-auto text-slate-400 mb-3" />
-            <h3 className="text-lg font-semibold text-slate-900 mb-1">Upload Documents</h3>
-            <p className="text-slate-600 mb-6">Drag and drop or click to select files</p>
+            <h3 className="text-lg font-semibold text-slate-900 mb-1">Ajouter des documents</h3>
+            <p className="text-slate-600 mb-6">Glissez-déposez ou cliquez pour sélectionner des fichiers</p>
             <input
               ref={fileInputRef}
               type="file"
@@ -314,15 +314,16 @@ const LoanRequestPage: React.FC = () => {
             <button
               type="button"
               onClick={openFilePicker}
-              className="px-6 py-2.5 bg-gradient-brand text-white rounded-lg cursor-pointer hover:shadow-lg transition-all duration-250 inline-block font-medium"
+              className="text-white rounded-xl cursor-pointer hover:shadow-lg hover:opacity-90 transition-all duration-250 inline-block font-semibold"
+              style={{ background: 'linear-gradient(135deg, #ee7728 0%, #f19250 100%)', padding: '7px 18px' }}
             >
-              Select Files
+              Sélectionner des fichiers
             </button>
           </div>
 
           {/* Document List */}
           {documents.length > 0 && (
-            <div className="mt-8 space-y-4">
+            <div style={{ marginTop: '24px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
               {documents.map((doc, idx) => (
                 <div
                   key={idx}
@@ -352,7 +353,7 @@ const LoanRequestPage: React.FC = () => {
 
         {/* Consent */}
         <div className="loan-section">
-          <label className="flex items-start space-x-4 cursor-pointer group">
+          <label className="flex items-start cursor-pointer group" style={{ gap: '14px' }}>
             <input
               type="checkbox"
               name="acceptSolvabilityStudy"
@@ -362,7 +363,7 @@ const LoanRequestPage: React.FC = () => {
               required
             />
             <span className="text-slate-700 group-hover:text-slate-900 leading-relaxed text-[15px]">
-              I agree to the terms and conditions and authorize credit checks and financial verification
+              J'accepte les conditions générales et autorise les vérifications de crédit et de solvabilité
             </span>
           </label>
         </div>
@@ -373,14 +374,15 @@ const LoanRequestPage: React.FC = () => {
             type="button"
             className="px-6 py-3 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-all duration-250 font-semibold"
           >
-            Cancel
+            Annuler
           </button>
           <button
             type="submit"
             disabled={isSubmitting || !formData.acceptSolvabilityStudy}
-            className="px-8 py-3 bg-gradient-brand text-white rounded-lg hover:shadow-lg transition-all duration-250 disabled:opacity-50 disabled:cursor-not-allowed font-semibold flex items-center space-x-2"
+            className="text-white rounded-xl hover:shadow-lg hover:opacity-90 transition-all duration-250 disabled:opacity-50 disabled:cursor-not-allowed font-semibold flex items-center space-x-2"
+            style={{ background: 'linear-gradient(135deg, #ee7728 0%, #f19250 100%)', padding: '7px 18px' }}
           >
-            <span>{isSubmitting ? 'Submitting...' : 'Submit Application'}</span>
+            <span>{isSubmitting ? 'Envoi en cours...' : 'Soumettre la demande'}</span>
             <CheckCircle size={18} />
           </button>
         </div>

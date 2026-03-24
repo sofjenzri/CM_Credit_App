@@ -178,7 +178,8 @@ const SubmissionsPage: React.FC = () => {
 
         <div className="flex items-center gap-3 mt-4 md:mt-0">
           <button
-            className="px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 flex items-center gap-2 hover:bg-slate-50"
+            className="rounded-xl border border-slate-200 bg-white text-slate-700 flex items-center gap-2 hover:bg-slate-50"
+            style={{ padding: '10px 28px' }}
             onClick={() => loadCases(true)}
             disabled={refreshing}
           >
@@ -190,7 +191,7 @@ const SubmissionsPage: React.FC = () => {
 
       <div className="bg-white rounded-2xl border border-slate-200 p-5 md:p-6 shadow-sm">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-          <div className="flex items-center px-3 py-2.5 rounded-xl bg-slate-100 border border-slate-200 max-w-md w-full">
+          <div className="flex items-center px-3 rounded-xl bg-slate-100 border border-slate-200 max-w-md w-full" style={{ paddingTop: '10px', paddingBottom: '10px' }}>
             <Search size={16} className="text-slate-500" />
             <input
               className="bg-transparent outline-none text-sm text-slate-700 placeholder:text-slate-400 w-full"
@@ -209,9 +210,10 @@ const SubmissionsPage: React.FC = () => {
               <button
                 key={group.key}
                 onClick={() => setActiveGroup(group.key)}
-                className={`px-3 py-1.5 rounded-lg border text-sm font-semibold transition-colors ${
+                className={`rounded-lg border text-sm font-semibold transition-colors ${
                   activeGroup === group.key ? group.className : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
                 }`}
+                style={{ padding: '8px 24px' }}
               >
                 {group.label} ({groupCount(group.key)})
               </button>

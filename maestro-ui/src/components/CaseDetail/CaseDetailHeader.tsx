@@ -11,14 +11,9 @@ interface Props {
   onOpenMaestroDetail: () => void;
 }
 
-const UIPATH_BASE_URL = import.meta.env.VITE_UIPATH_BASE_URL || 'https://staging.uipath.com';
-const UIPATH_ORG_NAME = import.meta.env.VITE_UIPATH_ORG_NAME || 'france';
-const UIPATH_TENANT_NAME = import.meta.env.VITE_UIPATH_TENANT_NAME || 'DefaultTenant';
-const UIPATH_FOLDER_KEY = import.meta.env.VITE_UIPATH_FOLDER_KEY || '';
-const TARGET_CASE_MODEL_ID = import.meta.env.VITE_TARGET_CASE_MODEL_ID || '';
-
 const CaseDetailHeader: React.FC<Props> = ({ detail, prevCaseId, nextCaseId, onOpenMaestroDetail }) => {
   const navigate = useNavigate();
+  const adminUrl = String(detail?.adminUrl || '').trim();
 
   return (
     <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
@@ -35,10 +30,11 @@ const CaseDetailHeader: React.FC<Props> = ({ detail, prevCaseId, nextCaseId, onO
           <button
             type="button"
             title="Ouvrir la fiche Admin UiPath"
-            className="ml-2 px-2 py-1 rounded-lg border border-amber-400 bg-amber-50 text-amber-700 hover:bg-amber-100 flex items-center gap-1 text-xs font-semibold"
+            className="ml-2 px-2 py-1 rounded-lg border border-amber-400 bg-amber-50 text-amber-700 hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-50 flex items-center gap-1 text-xs font-semibold"
+            disabled={!adminUrl}
             onClick={() => {
-              const url = `${UIPATH_BASE_URL}/${UIPATH_ORG_NAME}/${UIPATH_TENANT_NAME}/maestro_/cases/${TARGET_CASE_MODEL_ID}/instances/${detail.id}?folderkey=${UIPATH_FOLDER_KEY}`;
-              window.open(url, 'admin_popup', 'width=1200,height=900,noopener');
+              if (!adminUrl) return;
+              window.open(adminUrl, 'admin_popup', 'width=1200,height=900,noopener');
             }}
           >
             <Shield size={14} className="inline" />

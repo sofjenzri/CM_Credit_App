@@ -70,8 +70,8 @@ const DocumentPreviewCard: React.FC<DocumentPreviewCardProps> = ({
 
   return (
     <article className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{document.fileType || 'Document'}</p>
-      <div className="mt-3 h-56 overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
+      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500" style={{ padding: '10px 0 14px 12px' }}>{document.fileType || 'Document'}</p>
+      <div className="h-56 overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
         {previewUrl && isImage ? (
           <img src={previewUrl} alt={document.fileName || 'document'} className="h-full w-full object-cover" />
         ) : previewUrl && isPdf ? (
@@ -87,11 +87,11 @@ const DocumentPreviewCard: React.FC<DocumentPreviewCardProps> = ({
           </div>
         )}
       </div>
-      <div className="mt-3 flex items-start justify-between gap-3">
+      <div className="mt-5 flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="truncate text-sm font-semibold text-slate-900">{document.fileName || '-'}</p>
+          <p className="truncate text-sm font-semibold text-slate-900" style={{ padding: '10px 0 4px 12px' }}>{document.fileName || '-'}</p>
         </div>
-        <div className="flex shrink-0 items-center gap-2">
+        <div className="flex shrink-0 items-center gap-2" style={{ paddingTop: '10px' }}>
           <button
             type="button"
             onClick={() => onOpenDocument(document.url || '', document.fileName || 'document', document.id)}
@@ -209,7 +209,7 @@ const CompletenessTaskPage: React.FC<TaskDataProps> = ({
         </div>
       ) : null}
 
-      <div className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
+      <div className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_480px]">
         <section className="rounded-2xl border border-slate-200 bg-white p-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
@@ -223,9 +223,9 @@ const CompletenessTaskPage: React.FC<TaskDataProps> = ({
           </div>
 
           {!caseDetail?.documents?.length ? (
-            <p className="mt-4 text-sm text-slate-500">Aucun document disponible pour ce dossier.</p>
+            <p className="text-sm text-slate-500" style={{ marginTop: '40px' }}>Aucun document disponible pour ce dossier.</p>
           ) : (
-            <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2 2xl:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 2xl:grid-cols-3" style={{ marginTop: '40px' }}>
               {caseDetail.documents.map((document) => (
                 <DocumentPreviewCard
                   key={document.id}
@@ -243,9 +243,9 @@ const CompletenessTaskPage: React.FC<TaskDataProps> = ({
         <section className="rounded-2xl border border-slate-200 bg-white p-6 h-fit">
           {agentAnalysis ? (
             <>
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+              <div className="rounded-2xl border border-slate-200 bg-slate-50" style={{ padding: '8px' }}>
                 <div className="flex h-12 items-center">
-                  <h2 className="text-lg font-semibold text-cyan-700">Analyse agent</h2>
+                  <h2 className="text-lg font-semibold text-cyan-700">Conclusions de l'Agent IA</h2>
                 </div>
                 <div className="h-2" aria-hidden="true" />
                 <div>
@@ -256,12 +256,13 @@ const CompletenessTaskPage: React.FC<TaskDataProps> = ({
             </>
           ) : null}
 
-          <div className="mt-5 grid grid-cols-1 gap-3">
+          <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '12px', alignItems: 'center' }}>
             <button
               type="button"
               onClick={() => handleComplete('AnalyzeCompleteness')}
               disabled={submitting}
-              className="inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-xl border border-cyan-700 bg-cyan-700 px-6 py-4 text-sm font-semibold text-white hover:bg-cyan-800 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl text-sm font-semibold text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+              style={{ background: 'linear-gradient(135deg, #ee7728 0%, #f19250 100%)', padding: '10px 20px', width: '220px' }}
             >
               {submitting ? <Loader2 size={16} className="animate-spin" /> : null}
               Réévaluer le dossier
@@ -270,7 +271,8 @@ const CompletenessTaskPage: React.FC<TaskDataProps> = ({
               type="button"
               onClick={() => handleComplete('NotifyClient')}
               disabled={submitting}
-              className="inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-xl border border-amber-600 bg-amber-500 px-6 py-4 text-sm font-semibold text-white hover:bg-amber-600 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-cyan-700 bg-cyan-700 text-sm font-semibold text-white hover:bg-cyan-800 disabled:cursor-not-allowed disabled:opacity-60"
+              style={{ padding: '10px 20px', width: '220px' }}
             >
               {submitting ? <Loader2 size={16} className="animate-spin" /> : null}
               Notifier le client
@@ -279,10 +281,11 @@ const CompletenessTaskPage: React.FC<TaskDataProps> = ({
               type="button"
               onClick={() => handleComplete('RejectCase')}
               disabled={submitting}
-              className="inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-xl border border-rose-700 bg-rose-700 px-6 py-4 text-sm font-semibold text-white hover:bg-rose-800 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-rose-700 bg-rose-700 text-sm font-semibold text-white hover:bg-rose-800 disabled:cursor-not-allowed disabled:opacity-60"
+              style={{ padding: '10px 20px', width: '220px' }}
             >
               {submitting ? <Loader2 size={16} className="animate-spin" /> : null}
-              Clôturer le cas
+              Rejeter le dossier
             </button>
           </div>
         </section>

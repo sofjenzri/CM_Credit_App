@@ -235,6 +235,7 @@ const TaskDetailPage: React.FC = () => {
   const normalizedTaskTitle = String(taskForm?.title || task?.Title || '').trim().toLowerCase();
   const isCompletenessTask = normalizedTaskTitle === completenessTaskName;
   const businessCaseId = String(caseDetail?.caseId || '').trim();
+  const agentAnalysis = taskForm?.data?.AgentAnalysis;
 
   const handleReturnToCase = () => {
     navigate(caseId ? `/cases/${caseId}` : '/cases');
@@ -333,18 +334,9 @@ const TaskDetailPage: React.FC = () => {
     <div className="detail-page">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <p className="text-sm font-medium text-slate-500">AppTask</p>
           <h1 className="text-2xl font-bold text-slate-900">{taskForm?.title || task?.Title || `Tâche ${taskId}`}</h1>
           <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-slate-600">
-            <span className="inline-flex rounded-full bg-slate-100 px-3 py-1 font-medium text-slate-700">
-              {task?.Status || 'Statut inconnu'}
-            </span>
-            {task?.Priority ? (
-              <span className="inline-flex rounded-full bg-amber-100 px-3 py-1 font-medium text-amber-800">
-                Priorité {task.Priority}
-              </span>
-            ) : null}
-            <span>Dossier: {caseId || '-'}</span>
+            <span>Dossier: {businessCaseId || caseId || '-'}</span>
             <span>Créée le {formatDate(task?.CreationTime || taskForm?.creationTime)}</span>
           </div>
         </div>
@@ -371,8 +363,7 @@ const TaskDetailPage: React.FC = () => {
             <>
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <p className="text-sm font-medium text-slate-500">Documents du dossier</p>
-                  <h2 className="text-lg font-semibold text-slate-900">Pièces rattachées</h2>
+                  <h2 className="text-lg font-semibold text-slate-900">Documents du dossier</h2>
                 </div>
                 <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
                   {uploading ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
@@ -414,18 +405,29 @@ const TaskDetailPage: React.FC = () => {
         </section>
 
         <section className="rounded-2xl border border-slate-200 bg-white p-6 h-fit">
-          <h2 className="text-lg font-semibold text-slate-900">Décision</h2>
+          {isCompletenessTask && agentAnalysis ? (
+            <>
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+                <div className="flex h-12 items-center">
+                  <h2 className="text-lg font-semibold text-cyan-700">Analyse agent</h2>
+                </div>
+                <div className="h-2" aria-hidden="true" />
+                <div>
+                  <ReadOnlyField label="" value={agentAnalysis} />
+                </div>
+              </div>
+              <div className="h-[200px]" aria-hidden="true" />
+            </>
+          ) : null}
+
           {isCompletenessTask ? (
             <>
-              <p className="mt-2 text-sm text-slate-500">
-                Cette action permet de traiter la complétude du dossier et de déclencher l&apos;action UiPath appropriée.
-              </p>
               <div className="mt-5 grid grid-cols-1 gap-3">
                 <button
                   type="button"
                   onClick={() => handleComplete('AnalyzeCompleteness')}
                   disabled={submitting}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-cyan-700 bg-cyan-700 px-4 py-3 text-sm font-semibold text-white hover:bg-cyan-800 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex min-h-14 items-center justify-center gap-2 rounded-xl border border-cyan-700 bg-cyan-700 px-4 py-4 text-sm font-semibold text-white hover:bg-cyan-800 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {submitting ? <Loader2 size={16} className="animate-spin" /> : null}
                   Réévaluer le dossier
@@ -434,7 +436,7 @@ const TaskDetailPage: React.FC = () => {
                   type="button"
                   onClick={() => handleComplete('NotifyClient')}
                   disabled={submitting}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-amber-600 bg-amber-500 px-4 py-3 text-sm font-semibold text-white hover:bg-amber-600 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex min-h-14 items-center justify-center gap-2 rounded-xl border border-amber-600 bg-amber-500 px-4 py-4 text-sm font-semibold text-white hover:bg-amber-600 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {submitting ? <Loader2 size={16} className="animate-spin" /> : null}
                   Notifier le client
@@ -443,7 +445,7 @@ const TaskDetailPage: React.FC = () => {
                   type="button"
                   onClick={() => handleComplete('RejectCase')}
                   disabled={submitting}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-rose-700 bg-rose-700 px-4 py-3 text-sm font-semibold text-white hover:bg-rose-800 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex min-h-14 items-center justify-center gap-2 rounded-xl border border-rose-700 bg-rose-700 px-4 py-4 text-sm font-semibold text-white hover:bg-rose-800 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {submitting ? <Loader2 size={16} className="animate-spin" /> : null}
                   Clôturer le cas
@@ -488,11 +490,13 @@ const TaskDetailPage: React.FC = () => {
               </div>
             </>
           )}
-          <div className="mt-4">
-            <Link to={caseId ? `/cases/${caseId}` : '/cases'} className="text-sm font-medium text-cyan-700 hover:text-cyan-900">
-              Retour au dossier
-            </Link>
-          </div>
+          {!isCompletenessTask ? (
+            <div className="mt-4">
+              <Link to={caseId ? `/cases/${caseId}` : '/cases'} className="text-sm font-medium text-cyan-700 hover:text-cyan-900">
+                Retour au dossier
+              </Link>
+            </div>
+          ) : null}
         </section>
       </div>
 

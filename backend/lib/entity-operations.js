@@ -169,6 +169,31 @@ export const uploadEntityAttachment = async (token, entityName, recordId, fieldN
   throw new Error(`Impossible d'uploader la pièce jointe sur ${entityName}/${recordId}/${fieldName}. ${errors.join(' | ')}`);
 };
 
+export const deleteEntityRecordById = async (token, entityId, recordId) => {
+  const candidates = [
+    { path: `datafabric_/api/EntityService/entity/${entityId}/record/${recordId}`, method: 'DELETE' },
+    { path: `datafabric_/api/EntityService/entity/${entityId}/delete`, method: 'POST', body: [recordId] },
+    { path: `datafabric_/api/EntityService/entity/${entityId}/deleteRecordsById`, method: 'POST', body: { ids: [recordId] } },
+    { path: `datafabric_/api/EntityService/entity/${entityId}/deleteRecordsById`, method: 'POST', body: { items: [{ Id: recordId }] } },
+    { path: `datafabric_/api/EntityService/entity/${entityId}/deleteRecordsById`, method: 'POST', body: { items: [{ id: recordId }] } },
+    { path: `datafabric_/api/EntityService/entity/${entityId}/delete`, method: 'POST', body: { ids: [recordId] } },
+    { path: `datafabric_/api/EntityService/entity/${entityId}/delete`, method: 'POST', body: { items: [recordId] } },
+  ];
+
+  const errors = [];
+  for (const candidate of candidates) {
+    const response = await uiPathRequest(token, candidate.path, {
+      method: candidate.method,
+      headers: candidate.body ? { 'Content-Type': 'application/json' } : {},
+      body: candidate.body ? JSON.stringify(candidate.body) : undefined,
+    });
+    if (response.ok) return;
+    errors.push(`${candidate.path} -> ${response.status}: ${response.text}`);
+  }
+
+  throw new Error(`Impossible de supprimer l'enregistrement ${recordId} de l'entité ${entityId}. Détails: ${errors.join(' | ')}`);
+};
+
 export const getEntitySampleRecord = async (token, entityId) => {
   const response = await uiPathJsonRequest(token, `datafabric_/api/EntityService/entity/${entityId}/read`, {
     limit: 1, start: 0, expansionLevel: 2,

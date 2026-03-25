@@ -9,6 +9,8 @@ export interface CaseListItem {
   creditType?: string;
   requestedAmount?: number | string;
   dossierStatus?: string;
+  currentActivityLabel?: string;
+  currentActivityType?: string;
   createdTime?: string;
   slaStatus?: string;
 }
@@ -129,7 +131,46 @@ const fetchJson = async <T>(path: string): Promise<T> => {
   return response.json() as Promise<T>;
 };
 
+const postFormData = async <T>(path: string, body: FormData): Promise<T> => {
+  const response = await fetch(`${API_BASE}${path}`, {
+    method: 'POST',
+    headers: {
+      ...getAuthHeaders(),
+    },
+    body,
+  });
+
+  if (!response.ok) {
+    const message = await response.text();
+    throw new Error(message || `HTTP ${response.status}`);
+  }
+
+  return response.json() as Promise<T>;
+};
+
+const deleteRequest = async (path: string): Promise<void> => {
+  const response = await fetch(`${API_BASE}${path}`, {
+    method: 'DELETE',
+    headers: {
+      ...getAuthHeaders(),
+    },
+  });
+
+  if (!response.ok) {
+    const message = await response.text();
+    throw new Error(message || `HTTP ${response.status}`);
+  }
+};
+
 export const casesService = {
   getCases: () => fetchJson<CaseListItem[]>('/cases'),
   getCaseById: (id: string) => fetchJson<CaseDetail>(`/cases/${encodeURIComponent(id)}`),
+  uploadDocument: (caseId: string, file: File) => {
+    const formData = new FormData();
+    formData.append('document', file);
+    formData.append('fileName', file.name);
+    formData.append('fileType', file.type || '');
+    return postFormData<NonNullable<CaseDetail['documents']>[number]>(`/cases/${encodeURIComponent(caseId)}/documents`, formData);
+  },
+  deleteDocument: (recordId: string) => deleteRequest(`/documents/${encodeURIComponent(recordId)}`),
 };

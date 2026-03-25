@@ -27,6 +27,45 @@ import {
 } from './entity-operations.js';
 import { mapTaskLikeObject } from './data-mappers.js';
 
+const isCompletedTaskStatus = (status = '', taskState = '') => {
+  const normalized = `${String(status)} ${String(taskState)}`.toLowerCase();
+  return normalized.includes('complete') || normalized.includes('done') || normalized.includes('executed') || normalized.includes('closed') || normalized.includes('finish');
+};
+
+const isCurrentTaskStatus = (status = '', taskState = '') => {
+  const normalized = `${String(status)} ${String(taskState)}`.toLowerCase();
+  return normalized.includes('running')
+    || normalized.includes('progress')
+    || normalized.includes('active')
+    || normalized.includes('open')
+    || normalized.includes('assigned')
+    || normalized.includes('unassigned')
+    || normalized.includes('pending');
+};
+
+const pickCurrentActivityLabel = (context) => {
+  const normalizedTasks = (context.tasks || []).map((task) => mapTaskLikeObject(task));
+  const currentTask = normalizedTasks.find((task) => isCurrentTaskStatus(task.status, task.taskState) && !isCompletedTaskStatus(task.status, task.taskState));
+  if (currentTask?.name) return currentTask.name;
+
+  const currentStageName = String(context.currentStage || '').trim();
+  if (currentStageName) return `Etape ${currentStageName}`;
+
+  return context.status || '-';
+};
+
+const isAppTaskType = (type = '') => {
+  const normalized = String(type).toLowerCase();
+  return normalized.includes('apptask') || normalized === 'apptask' || normalized.includes('app');
+};
+
+const pickCurrentActivityType = (context) => {
+  const normalizedTasks = (context.tasks || []).map((task) => mapTaskLikeObject(task));
+  const currentTask = normalizedTasks.find((task) => isCurrentTaskStatus(task.status, task.taskState) && !isCompletedTaskStatus(task.status, task.taskState));
+  if (currentTask?.type && isAppTaskType(currentTask.type)) return 'AppTask';
+  return currentTask?.type || '';
+};
+
 export const fetchUiPathData = async (token) => {
   const [processesResponse, instancesResponse, entitiesResponse] = await Promise.all([
     uiPathJsonRequest(token, 'pims_/api/v1/processes/summary', { processType: 'CaseManagement' }),
@@ -139,6 +178,8 @@ export const fetchUiPathData = async (token) => {
       cleanPlaceholder(findValueByKeyTokens(context.mainCaseRecord || {}, ['casestatus', 'dossierstatus', 'status'])) ||
       context.status ||
       '-',
+    currentActivityLabel: pickCurrentActivityLabel(context),
+    currentActivityType: pickCurrentActivityType(context),
     createdTime:
       cleanPlaceholder(getStringField(context.mainCaseRecord || {}, ['CreateTime', 'CreatedAt', 'CreationTime', 'UpdateTime'])) ||
       cleanPlaceholder(findValueByKeyTokens(context.mainCaseRecord || {}, ['createtime', 'createdat', 'creationtime'])) ||

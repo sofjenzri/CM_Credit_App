@@ -1,5 +1,6 @@
 import React from 'react';
 import { Clock3, ExternalLink, User } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import type { CaseTask } from '../../services/cases';
 import {
   isCompletedTaskStatus,
@@ -12,16 +13,11 @@ import {
 } from '../../utils/caseFormatters';
 
 interface Props {
+  caseId: string;
   tasks: CaseTask[];
 }
 
-const UIPATH_BASE_URL = import.meta.env.VITE_UIPATH_BASE_URL || 'https://staging.uipath.com';
-const UIPATH_ORG_NAME = import.meta.env.VITE_UIPATH_ORG_NAME || 'france';
-const UIPATH_TENANT_NAME = import.meta.env.VITE_UIPATH_TENANT_NAME || 'DefaultTenant';
-
-const CaseAppTasksList: React.FC<Props> = ({ tasks }) => {
-  const uipathActionUrl = `${UIPATH_BASE_URL}/${UIPATH_ORG_NAME}/${UIPATH_TENANT_NAME}/actions_/`;
-
+const CaseAppTasksList: React.FC<Props> = ({ caseId, tasks }) => {
   return (
     <section className="rounded-2xl border border-slate-200 bg-white p-6">
       <h3 className="font-semibold text-slate-900 mb-4">Tâches à effectuer</h3>
@@ -50,25 +46,21 @@ const CaseAppTasksList: React.FC<Props> = ({ tasks }) => {
                     {isCompleted ? (
                       <span className="text-slate-500 line-through text-sm font-semibold">{task.name || '-'}</span>
                     ) : isPending ? (
-                      <a
-                        href={uipathActionUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                      <Link
+                        to={`/cases/${caseId}/tasks/${task.id}`}
                         className="inline-flex items-center gap-1 text-cyan-700 text-sm font-semibold underline hover:text-cyan-900"
                       >
                         {task.name || '-'}
                         <ExternalLink size={14} />
-                      </a>
+                      </Link>
                     ) : isRunning ? (
-                      <a
-                        href={task.externalLink || uipathActionUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                      <Link
+                        to={`/cases/${caseId}/tasks/${task.id}`}
                         className="inline-flex items-center gap-1 text-cyan-700 text-sm font-semibold underline hover:text-cyan-900"
                       >
                         {task.name || '-'}
                         <ExternalLink size={14} />
-                      </a>
+                      </Link>
                     ) : (
                       <span className="text-slate-900 text-sm font-semibold">{task.name || '-'}</span>
                     )}

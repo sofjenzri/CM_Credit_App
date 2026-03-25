@@ -7,7 +7,6 @@ import {
   isInProgressStageStatus,
   isAppTask,
   isCompletedTaskStatus,
-  isRunningTaskStatus,
   isCurrentAppTaskStatus,
   isCompletedExecutionStatus,
   isAllowedChronologyElementType,
@@ -88,8 +87,8 @@ const CaseDetailPage: React.FC = () => {
       });
   }, [appTasks]);
 
-  const runningAppTask = useMemo(
-    () => visibleAppTasks.find((task) => isRunningTaskStatus(task.status, task.taskState) && !isCompletedTaskStatus(task.status, task.taskState)) ?? null,
+  const currentAppTask = useMemo(
+    () => visibleAppTasks.find((task) => isCurrentAppTaskStatus(task.status, task.taskState) && !isCompletedTaskStatus(task.status, task.taskState)) ?? null,
     [visibleAppTasks],
   );
 
@@ -103,18 +102,18 @@ const CaseDetailPage: React.FC = () => {
   const chronologyEvents = useMemo((): ChronologyEvent[] => {
     const events: ChronologyEvent[] = [];
 
-    if (runningAppTask) {
+    if (currentAppTask) {
       events.push({
-        id: `current-${runningAppTask.id || 'task-activity'}`,
-        title: runningAppTask.name || 'Activité en cours',
-        time: runningAppTask.startedTime || runningAppTask.dueDate,
-        status: runningAppTask.taskState || runningAppTask.status || 'Running',
-        elementType: runningAppTask.type || 'AppTask',
+        id: `current-${currentAppTask.id || 'task-activity'}`,
+        title: currentAppTask.name || 'Activité en cours',
+        time: currentAppTask.startedTime || currentAppTask.dueDate,
+        status: currentAppTask.taskState || currentAppTask.status || 'Running',
+        elementType: currentAppTask.type || 'AppTask',
         details: [
-          runningAppTask.stageName ? `Étape: ${runningAppTask.stageName}` : '',
-          runningAppTask.assignee ? `Assigné à ${runningAppTask.assignee}` : '',
+          currentAppTask.stageName ? `Étape: ${currentAppTask.stageName}` : '',
+          currentAppTask.assignee ? `Assigné à ${currentAppTask.assignee}` : '',
         ].filter(Boolean).join(' • '),
-        startedTime: runningAppTask.startedTime || runningAppTask.dueDate,
+        startedTime: currentAppTask.startedTime || currentAppTask.dueDate,
         priority: 1000,
         source: 'current',
       });
@@ -191,7 +190,7 @@ const CaseDetailPage: React.FC = () => {
     });
 
     return deduped;
-  }, [detail, runningAppTask, completedAppTasks]);
+  }, [detail, currentAppTask, completedAppTasks]);
 
   const openMaestroDetail = () => {
     const maestroUrl = buildMaestroDetailUrl(detail?.id, detail?.folderKey);
@@ -260,7 +259,7 @@ const CaseDetailPage: React.FC = () => {
             <CaseClientInfo client={detail.client} />
             <CaseCreditInfo credit={detail.credit} />
           </div>
-          <CaseAppTasksList tasks={visibleAppTasks} />
+          <CaseAppTasksList caseId={detail.id} tasks={visibleAppTasks} />
           <CaseDocumentsTable documents={detail.documents} onOpenDocument={openDocument} openingDocId={openingDocId} />
         </div>
 

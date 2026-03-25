@@ -8,6 +8,7 @@ import casesRouter from './routes/cases.js';
 import documentsRouter from './routes/documents.js';
 import loanRequestsRouter from './routes/loan-requests.js';
 import oauthRouter from './routes/oauth.js';
+import tasksRouter from './routes/tasks.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -25,6 +26,7 @@ export const createApp = () => {
   app.use('/api', systemRouter);
   app.use('/api', loanRequestsRouter);
   app.use('/api', casesRouter);
+  app.use('/api', tasksRouter);
   app.use('/api', documentsRouter);
   app.use('/api', oauthRouter);
 

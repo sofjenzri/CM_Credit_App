@@ -39,10 +39,10 @@ const CaseChronology: React.FC<Props> = ({ events }) => (
 
           // Bullet color logic
           let bulletClass = '';
-          if (isCompleted) {
-            bulletClass = 'text-emerald-500';
-          } else if (isCurrentEvent) {
-            bulletClass = 'bg-cyan-600 rounded-full';
+          if (isCurrentEvent) {
+            bulletClass = 'bg-emerald-500 rounded-full';
+          } else if (isCompleted) {
+            bulletClass = 'text-slate-400';
           } else if (isStageEvent) {
             bulletClass = 'bg-orange-500 rotate-45 rounded-[2px]';
           } else if (isStartEvent) {
@@ -66,8 +66,8 @@ const CaseChronology: React.FC<Props> = ({ events }) => (
                   {/* Vertical line */}
                   {!isFirst || !isLast ? <span className="absolute top-0 bottom-0 w-[2px] bg-slate-300" /> : null}
                   {/* Bullet or check */}
-                  {isCompleted ? (
-                    <CheckCircle2 size={20} className="z-10 text-emerald-500 bg-white rounded-full" />
+                  {isCompleted && !isCurrentEvent ? (
+                    <CheckCircle2 size={20} className={`z-10 bg-white rounded-full ${isStageEvent ? 'text-orange-500' : 'text-slate-400'}`} />
                   ) : (
                     <span className={`w-3 h-3 block z-10 ${bulletClass}`} />
                   )}

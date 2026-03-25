@@ -39,13 +39,6 @@ const formatDate = (value?: string) => {
   }).format(date);
 };
 
-const statusStyle = (status?: string) => {
-  const group = groupForStatus(status);
-  if (group === 'faulted') return 'bg-red-100 text-red-700';
-  if (group === 'completed') return 'bg-emerald-100 text-emerald-700';
-  return 'bg-cyan-100 text-cyan-700';
-};
-
 const SubmissionsPage: React.FC = () => {
   const navigate = useNavigate();
   const [cases, setCases] = useState<CaseListItem[]>([]);
@@ -247,8 +240,8 @@ const SubmissionsPage: React.FC = () => {
                     <td className="py-1.5 px-4 text-slate-700 leading-tight">{row.creditType || '-'}</td>
                     <td className="py-1.5 px-4 text-slate-900 font-semibold leading-tight">{formatAmount(row.requestedAmount)}</td>
                     <td className="py-1.5 px-4 leading-tight">
-                      <span className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-semibold leading-tight ${statusStyle(row.status)}`}>
-                        {row.dossierStatus || row.status || '-'}
+                      <span className={`text-sm font-normal leading-tight ${row.currentActivityType === 'AppTask' ? 'text-orange-600' : 'text-slate-700'}`}>
+                        {row.currentActivityLabel || row.dossierStatus || row.status || '-'}
                       </span>
                     </td>
                     <td className="py-1.5 px-4 text-slate-500 text-sm leading-tight">{formatDate(row.createdTime)}</td>

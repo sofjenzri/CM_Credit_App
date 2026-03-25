@@ -8,6 +8,7 @@ import DashboardPage from './pages/DashboardPage';
 import LoanRequestPage from './pages/LoanRequestPage';
 import SubmissionsPage from './pages/SubmissionsPage';
 import CaseDetailPage from './pages/CaseDetailPage';
+import TaskDetailPage from './pages/TaskDetailPage';
 import PriorityQueuePage from './pages/PriorityQueuePage';
 import AgentsPage from './pages/AgentsPage';
 import PortfolioPage from './pages/PortfolioPage';
@@ -30,6 +31,7 @@ const App: React.FC = () => {
             <Route path="/submissions" element={<SubmissionsPage />} />
             <Route path="/cases" element={<SubmissionsPage />} />
             <Route path="/cases/:id" element={<CaseDetailPage />} />
+            <Route path="/cases/:id/tasks/:taskId" element={<TaskDetailPage />} />
             <Route path="/priority-queue" element={<PriorityQueuePage />} />
             <Route path="/agents" element={<AgentsPage />} />
             <Route path="/portfolio" element={<PortfolioPage />} />

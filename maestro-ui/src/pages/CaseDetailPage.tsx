@@ -113,17 +113,31 @@ const CaseDetailPage: React.FC = () => {
       });
     }
 
-    const rawExecutions = (detail?.executionHistory?.elementExecutions || []).map((item) => {
+    const rawExecutions = (detail?.executionHistory?.elementExecutions || []).map((item, rawIndex) => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const i = item as any;
       return {
+        rawIndex,
         elementType: String(i.elementType || i.type || ''),
         elementName: String(i.elementName || i.name || ''),
         status: String(i.status || i.state || ''),
         startedTimeUtc: String(i.startedTimeUtc || i.startedTime || ''),
         completedTimeUtc: String(i.completedTimeUtc || i.completedTime || ''),
         elementId: String(i.elementId || i.id || ''),
+        externalLink: String(i.externalLink || ''),
       };
+    });
+
+    const bpmStartLinkByRawIndex = new Map<number, string>();
+    let lastBpmProcessLink = '';
+    rawExecutions.forEach((execution) => {
+      const candidateLink = String(execution.externalLink || '').trim();
+      if (candidateLink.includes('/maestro_/processes/')) {
+        lastBpmProcessLink = candidateLink;
+      }
+      if (execution.elementName.trim().toLowerCase() === 'début du processus' && lastBpmProcessLink) {
+        bpmStartLinkByRawIndex.set(execution.rawIndex, lastBpmProcessLink);
+      }
     });
 
     const completedExecutions = rawExecutions
@@ -136,12 +150,14 @@ const CaseDetailPage: React.FC = () => {
       const eventTime = item.completedTimeUtc || item.startedTimeUtc;
       if (!eventTime) return;
       const isStage = item.elementType.toLowerCase() === 'subprocess';
+      const isBpmStartEvent = item.elementName.trim().toLowerCase() === 'début du processus';
       events.push({
         id: `activity-${item.elementId || index}`,
         title: isStage ? `Etape ${item.elementName || 'Activité terminée'}` : (item.elementName || 'Activité terminée'),
         time: eventTime,
         status: item.status,
         elementType: item.elementType,
+        linkUrl: isBpmStartEvent ? (bpmStartLinkByRawIndex.get(item.rawIndex) || '') : '',
         startedTime: item.startedTimeUtc,
         completedTime: item.completedTimeUtc || eventTime,
         priority: 10,
@@ -186,7 +202,7 @@ const CaseDetailPage: React.FC = () => {
     return deduped;
   }, [detail, currentAppTask, completedAppTasks]);
 
-  if (loading) {
+  if (loading && !detail) {
     return (
       <div className="detail-page">
         <div className="rounded-2xl border border-slate-200 bg-white p-8 text-slate-700 flex items-center gap-3">

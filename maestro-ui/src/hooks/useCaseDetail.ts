@@ -1,6 +1,28 @@
 import { useEffect, useRef, useState } from 'react';
 import { casesService, type CaseDetail, type CaseListItem } from '../services/cases';
 
+const buildPartialDetailFromListItem = (item: CaseListItem): CaseDetail => ({
+  id: item.id,
+  caseId: item.caseId,
+  processKey: item.processKey,
+  processVersion: item.processVersion,
+  status: item.status,
+  currentStage: item.currentStage,
+  createdTime: item.createdTime,
+  startedTime: item.createdTime,
+  slaStatus: item.slaStatus,
+  client: {
+    name: item.clientName,
+  },
+  credit: {
+    creditType: item.creditType,
+    requestedAmount: item.requestedAmount,
+  },
+  stages: [],
+  tasks: [],
+  documents: [],
+});
+
 export function useCaseDetail(id: string | undefined, refreshKey?: number) {
   const [detail, setDetail] = useState<CaseDetail | null>(null);
   const [allCases, setAllCases] = useState<CaseListItem[]>([]);
@@ -27,38 +49,61 @@ export function useCaseDetail(id: string | undefined, refreshKey?: number) {
         setRefreshing(true);
       }
       setError(null);
-      try {
-        const [detailResponse, listResponse] = await Promise.all([
-          casesService.getCaseById(id),
-          casesService.getCases(),
-        ]);
-        if (isCancelled) return;
-        setDetail((currentDetail) => {
-          if (!currentDetail || currentDetail.id !== id || isInitialLoad) {
-            return detailResponse;
-          }
+      let hasVisiblePayload = !isInitialLoad;
 
-          return {
-            ...detailResponse,
-            status: currentDetail.status,
-            currentStage: currentDetail.currentStage,
-            createdTime: currentDetail.createdTime,
-            startedTime: currentDetail.startedTime,
-            slaStatus: currentDetail.slaStatus,
-            client: currentDetail.client,
-            credit: currentDetail.credit,
-          };
-        });
-        setAllCases(listResponse);
-      } catch (err) {
-        if (isCancelled) return;
-        setError(err instanceof Error ? err.message : 'Erreur de chargement du dossier');
-      } finally {
-        if (!isCancelled) {
+      const detailPromise = casesService.getCaseById(id)
+        .then((detailResponse) => {
+          if (isCancelled) return;
+          setDetail((currentDetail) => {
+            if (!currentDetail || currentDetail.id !== id || isInitialLoad) {
+              return detailResponse;
+            }
+
+            return {
+              ...detailResponse,
+              status: currentDetail.status,
+              currentStage: currentDetail.currentStage,
+              createdTime: currentDetail.createdTime,
+              startedTime: currentDetail.startedTime,
+              slaStatus: currentDetail.slaStatus,
+              client: currentDetail.client,
+              credit: currentDetail.credit,
+            };
+          });
+          hasVisiblePayload = true;
           setLoading(false);
           setRefreshing(false);
-        }
+        });
+
+      const listPromise = casesService.getCases()
+        .then((listResponse) => {
+          if (isCancelled) return;
+          setAllCases(listResponse);
+
+          if (!hasVisiblePayload) {
+            const matchingItem = listResponse.find((item) => item.id === id);
+            if (matchingItem) {
+              setDetail((currentDetail) => (
+                currentDetail && currentDetail.id === id
+                  ? currentDetail
+                  : buildPartialDetailFromListItem(matchingItem)
+              ));
+              hasVisiblePayload = true;
+              setLoading(false);
+            }
+          }
+        });
+
+      const [detailResult, listResult] = await Promise.allSettled([detailPromise, listPromise]);
+      if (isCancelled) return;
+
+      const firstRejected = [detailResult, listResult].find((result) => result.status === 'rejected');
+      if (firstRejected?.status === 'rejected') {
+        setError(firstRejected.reason instanceof Error ? firstRejected.reason.message : 'Erreur de chargement du dossier');
       }
+
+      setLoading(false);
+      setRefreshing(false);
     };
 
     load();

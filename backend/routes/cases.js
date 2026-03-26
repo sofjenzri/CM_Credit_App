@@ -7,7 +7,7 @@ import {
   uiPathJsonRequest,
 } from '../lib/uipath-client.js';
 import { extractItems } from '../lib/data-mappers.js';
-import { fetchUiPathData } from '../lib/fetch-uipath-data.js';
+import { fetchUiPathCaseList, fetchUiPathCaseDetail } from '../lib/fetch-uipath-data.js';
 import { getCurrentStage } from '../lib/case-processors.js';
 
 const router = Router();
@@ -81,7 +81,7 @@ router.get('/cases', async (req, res) => {
     }
 
     const token = await resolveAuthToken(req);
-    const data = await fetchUiPathData(token);
+    const data = await fetchUiPathCaseList(token);
     res.json(data.list);
   } catch (error) {
     console.error('ERROR /api/cases:', error.message, error.stack);
@@ -109,8 +109,7 @@ router.get('/cases/:id', async (req, res) => {
     }
 
     const token = await resolveAuthToken(req);
-    const data = await fetchUiPathData(token);
-    const found = data.detailById.get(req.params.id);
+    const found = await fetchUiPathCaseDetail(token, req.params.id);
     if (!found) {
       res.status(404).json({ message: 'Case introuvable' });
       return;

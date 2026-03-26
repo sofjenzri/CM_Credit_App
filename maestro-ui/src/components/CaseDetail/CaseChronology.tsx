@@ -1,6 +1,6 @@
 import React from 'react';
 import { badgeClassForStatus, translateStatus, formatDate } from '../../utils/caseFormatters';
-import { CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, ExternalLink } from 'lucide-react';
 
 export interface ChronologyEvent {
   id: string;
@@ -8,6 +8,7 @@ export interface ChronologyEvent {
   time?: string;
   status?: string;
   elementType?: string;
+  linkUrl?: string;
   details?: string;
   startedTime?: string;
   completedTime?: string;
@@ -77,6 +78,18 @@ const CaseChronology: React.FC<Props> = ({ events }) => (
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0 flex flex-wrap items-center gap-1">
                       <p className={`text-sm leading-relaxed ${isStageEvent ? 'font-semibold' : 'font-normal'} text-slate-800`}>{event.title}</p>
+                      {event.linkUrl ? (
+                        <a
+                          href={event.linkUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex h-5 w-5 items-center justify-center rounded-md text-cyan-700 transition hover:bg-cyan-50 hover:text-cyan-800"
+                          title="Ouvrir le processus BPM dans Maestro"
+                          aria-label={`Ouvrir ${event.title} dans Maestro`}
+                        >
+                          <ExternalLink size={13} />
+                        </a>
+                      ) : null}
                       {isCurrentEvent ? (
                         <span className="inline-flex px-2 py-0.5 rounded-full text-[11px] font-semibold bg-cyan-100 text-cyan-700">
                           En cours

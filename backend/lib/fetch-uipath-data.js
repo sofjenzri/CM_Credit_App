@@ -8,6 +8,7 @@ import {
   findRecordValueByKey,
   extractItems,
   isActiveProgressStatus,
+  normalizeToken,
 } from './data-mappers.js';
 import {
   resolveEntityByConfiguredName,
@@ -16,7 +17,7 @@ import {
   mapCaseDetail,
   getStagesData,
   getCaseTasksData,
-  getCaseActivityData,
+  buildActivityFromExecutionHistory,
   inferCurrentStageName,
 } from './case-processors.js';
 import {
@@ -73,6 +74,74 @@ const pickCurrentTaskId = (context) => {
 };
 
 export const fetchUiPathData = async (token) => {
+  const {
+    processes,
+    instanceContexts,
+    documentRecords,
+    documentsEntityName,
+  } = await fetchUiPathBaseData(token);
+
+  const enrichedContexts = await Promise.all(
+    instanceContexts.map((context) => enrichContextWithRuntimeData(token, context))
+  );
+
+  const list = enrichedContexts.map(mapContextToListItem);
+
+  const detailById = new Map(
+    enrichedContexts.map((context) => [
+      context.instanceId,
+      mapCaseDetail(context, documentRecords, documentsEntityName),
+    ])
+  );
+
+  return {
+    list,
+    detailById,
+    source: 'uipath',
+    processCount: processes.length,
+  };
+};
+
+export const fetchUiPathCaseList = async (token) => {
+  const {
+    processes,
+    instanceContexts,
+  } = await fetchUiPathBaseData(token, { includeDocuments: false });
+
+  const enrichedContexts = await Promise.all(
+    instanceContexts.map((context) => enrichContextForList(token, context))
+  );
+
+  return {
+    list: enrichedContexts.map(mapContextToListItem),
+    source: 'uipath',
+    processCount: processes.length,
+  };
+};
+
+export const fetchUiPathCaseDetail = async (token, requestedId) => {
+  const normalizedRequestedId = normalizeToken(requestedId);
+  const {
+    instanceContexts,
+    documentRecords,
+    documentsEntityName,
+  } = await fetchUiPathBaseData(token);
+
+  const matchingContext = instanceContexts.find((context) => (
+    normalizeToken(context.instanceId) === normalizedRequestedId
+    || normalizeToken(context.caseId) === normalizedRequestedId
+  ));
+
+  if (!matchingContext) {
+    return null;
+  }
+
+  const enrichedContext = await enrichContextWithRuntimeData(token, matchingContext);
+  return mapCaseDetail(enrichedContext, documentRecords, documentsEntityName);
+};
+
+const fetchUiPathBaseData = async (token, options = {}) => {
+  const { includeDocuments = true } = options;
   const [processesResponse, instancesResponse, entitiesResponse] = await Promise.all([
     uiPathJsonRequest(token, 'pims_/api/v1/processes/summary', { processType: 'CaseManagement' }),
     uiPathJsonRequest(token, 'pims_/api/v1/instances', { processType: 'CaseManagement', pageSize: 200 }),
@@ -89,9 +158,11 @@ export const fetchUiPathData = async (token) => {
   ));
 
   let mainCaseEntity = resolveEntityByConfiguredName(entities, uiPathConfig.mainCaseEntityName, ['credit', 'main', 'case']);
-  let documentsEntity = resolveEntityByConfiguredName(entities, uiPathConfig.caseDocumentsEntityName, ['credit', 'case', 'document']);
+  let documentsEntity = includeDocuments
+    ? resolveEntityByConfiguredName(entities, uiPathConfig.caseDocumentsEntityName, ['credit', 'case', 'document'])
+    : null;
 
-  if (!mainCaseEntity || !documentsEntity) {
+  if (!mainCaseEntity || (includeDocuments && !documentsEntity)) {
     try {
       const entitiesUnscopedResponse = await uiPathJsonRequestWithoutFolderContext(token, 'datafabric_/api/Entity');
       const entitiesUnscoped = extractItems(entitiesUnscopedResponse);
@@ -100,7 +171,7 @@ export const fetchUiPathData = async (token) => {
         if (!mainCaseEntity) {
           mainCaseEntity = resolveEntityByConfiguredName(entities, uiPathConfig.mainCaseEntityName, ['credit', 'main', 'case']);
         }
-        if (!documentsEntity) {
+        if (includeDocuments && !documentsEntity) {
           documentsEntity = resolveEntityByConfiguredName(entities, uiPathConfig.caseDocumentsEntityName, ['credit', 'case', 'document']);
         }
       }
@@ -123,7 +194,7 @@ export const fetchUiPathData = async (token) => {
     console.log('DEBUG fetchUiPathData - mainCaseRecords count:', mainCaseRecords.length);
   }
 
-  if (documentsEntity?.id) {
+  if (includeDocuments && documentsEntity?.id) {
     documentRecords = await readEntityRecordsWithFallback(token, documentsEntity.id, {
       limit: 500,
       start: 0,
@@ -136,76 +207,87 @@ export const fetchUiPathData = async (token) => {
 
   console.log('DEBUG fetchUiPathData - instanceContexts[0]:', JSON.stringify(instanceContexts[0], null, 2));
 
-  const enrichedContexts = await Promise.all(
-    instanceContexts.map(async (context) => {
-      const [stagesData, tasks, activity] = await Promise.all([
-        getStagesData(token, context.instanceId, uiPathConfig.folderKey),
-        getCaseTasksData(token, context.instanceId, uiPathConfig.folderKey),
-        getCaseActivityData(token, context.instanceId, uiPathConfig.folderKey),
-      ]);
-
-      const currentStageFromTasks = tasks
-        .map((task) => mapTaskLikeObject(task))
-        .find((task) => isActiveProgressStatus(task.taskState || task.status))?.stageName || '';
-
-      const currentStageFromExecution = inferCurrentStageName(stagesData.stages || []);
-
-      const derivedSla = normalizeSlaStatus(
-        context.slaStatus
-        || tasks.find((task) => String(task.slaStatus || '').trim())?.slaStatus
-        || ''
-      ) || 'N/A';
-
-      return {
-        ...context,
-        currentStage: stagesData.currentStageName || currentStageFromTasks || currentStageFromExecution || context.currentStage || '',
-        stages: stagesData.stages,
-        tasks,
-        activity,
-        executionHistory: stagesData.executionHistory,
-        caseJson: stagesData.caseJson,
-        slaStatus: derivedSla,
-      };
-    })
-  );
-
-  const list = enrichedContexts.map((context) => ({
-    id: context.instanceId,
-    caseId: context.caseId,
-    processKey: context.processKey,
-    processVersion: context.processVersion || '',
-    status: context.status,
-    currentStage: context.currentStage || '-',
-    clientName: findRecordValueByKey(context.mainCaseRecord || {}, 'Name', ['FullName', 'ClientName']) || '-',
-    creditType: findRecordValueByKey(context.mainCaseRecord || {}, 'CreditType', ['TypeCredit', 'Type_Credit']),
-    requestedAmount: findRecordValueByKey(context.mainCaseRecord || {}, 'RequestedAmount', ['AmountRequested', 'Requested_Amount']),
-    dossierStatus:
-      cleanPlaceholder(getStringField(context.mainCaseRecord || {}, ['CaseStatus', 'Status', 'DossierStatus'])) ||
-      cleanPlaceholder(findValueByKeyTokens(context.mainCaseRecord || {}, ['casestatus', 'dossierstatus', 'status'])) ||
-      context.status ||
-      '-',
-    currentActivityLabel: pickCurrentActivityLabel(context),
-    currentActivityType: pickCurrentActivityType(context),
-    currentTaskId: pickCurrentTaskId(context),
-    createdTime:
-      cleanPlaceholder(getStringField(context.mainCaseRecord || {}, ['CreateTime', 'CreatedAt', 'CreationTime', 'UpdateTime'])) ||
-      cleanPlaceholder(findValueByKeyTokens(context.mainCaseRecord || {}, ['createtime', 'createdat', 'creationtime'])) ||
-      cleanPlaceholder(context.createdTime) ||
-      '',
-    slaStatus: context.slaStatus || 'N/A',
-  }));
-
-  const detailById = new Map(
-    enrichedContexts.map((context) => [
-      context.instanceId,
-      mapCaseDetail(context, documentRecords, documentsEntity?.name || uiPathConfig.caseDocumentsEntityName),
-    ])
-  );
-
   return {
-    list,
-    detailById,
-    source: 'uipath',
-    processCount: processes.length,
+    processes,
+    instanceContexts,
+    documentRecords,
+    documentsEntityName: documentsEntity?.name || uiPathConfig.caseDocumentsEntityName,
   };
 };
+
+const enrichContextForList = async (token, context) => {
+  const tasks = await getCaseTasksData(token, context.instanceId, uiPathConfig.folderKey);
+  const currentStageFromTasks = tasks
+    .map((task) => mapTaskLikeObject(task))
+    .find((task) => isActiveProgressStatus(task.taskState || task.status))?.stageName || '';
+
+  const derivedSla = normalizeSlaStatus(
+    context.slaStatus
+    || tasks.find((task) => String(task.slaStatus || '').trim())?.slaStatus
+    || ''
+  ) || 'N/A';
+
+  return {
+    ...context,
+    currentStage: currentStageFromTasks || context.currentStage || '',
+    tasks,
+    slaStatus: derivedSla,
+  };
+};
+
+const enrichContextWithRuntimeData = async (token, context) => {
+  const [stagesData, tasks] = await Promise.all([
+    getStagesData(token, context.instanceId, uiPathConfig.folderKey),
+    getCaseTasksData(token, context.instanceId, uiPathConfig.folderKey),
+  ]);
+
+  const activity = buildActivityFromExecutionHistory(stagesData.executionHistory, tasks);
+  const currentStageFromTasks = tasks
+    .map((task) => mapTaskLikeObject(task))
+    .find((task) => isActiveProgressStatus(task.taskState || task.status))?.stageName || '';
+
+  const currentStageFromExecution = inferCurrentStageName(stagesData.stages || []);
+
+  const derivedSla = normalizeSlaStatus(
+    context.slaStatus
+    || tasks.find((task) => String(task.slaStatus || '').trim())?.slaStatus
+    || ''
+  ) || 'N/A';
+
+  return {
+    ...context,
+    currentStage: stagesData.currentStageName || currentStageFromTasks || currentStageFromExecution || context.currentStage || '',
+    stages: stagesData.stages,
+    tasks,
+    activity,
+    executionHistory: stagesData.executionHistory,
+    caseJson: stagesData.caseJson,
+    slaStatus: derivedSla,
+  };
+};
+
+const mapContextToListItem = (context) => ({
+  id: context.instanceId,
+  caseId: context.caseId,
+  processKey: context.processKey,
+  processVersion: context.processVersion || '',
+  status: context.status,
+  currentStage: context.currentStage || '-',
+  clientName: findRecordValueByKey(context.mainCaseRecord || {}, 'Name', ['FullName', 'ClientName']) || '-',
+  creditType: findRecordValueByKey(context.mainCaseRecord || {}, 'CreditType', ['TypeCredit', 'Type_Credit']),
+  requestedAmount: findRecordValueByKey(context.mainCaseRecord || {}, 'RequestedAmount', ['AmountRequested', 'Requested_Amount']),
+  dossierStatus:
+    cleanPlaceholder(getStringField(context.mainCaseRecord || {}, ['CaseStatus', 'Status', 'DossierStatus'])) ||
+    cleanPlaceholder(findValueByKeyTokens(context.mainCaseRecord || {}, ['casestatus', 'dossierstatus', 'status'])) ||
+    context.status ||
+    '-',
+  currentActivityLabel: pickCurrentActivityLabel(context),
+  currentActivityType: pickCurrentActivityType(context),
+  currentTaskId: pickCurrentTaskId(context),
+  createdTime:
+    cleanPlaceholder(getStringField(context.mainCaseRecord || {}, ['CreateTime', 'CreatedAt', 'CreationTime', 'UpdateTime'])) ||
+    cleanPlaceholder(findValueByKeyTokens(context.mainCaseRecord || {}, ['createtime', 'createdat', 'creationtime'])) ||
+    cleanPlaceholder(context.createdTime) ||
+    '',
+  slaStatus: context.slaStatus || 'N/A',
+});

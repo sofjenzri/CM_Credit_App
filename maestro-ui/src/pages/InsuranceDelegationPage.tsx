@@ -1,23 +1,23 @@
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { formatDate } from '../utils/caseFormatters';
-import ReadOnlyField from '../components/ReadOnlyField';
+import { looksLikeHtml, renderPrimitive } from '../components/ReadOnlyField';
 import type { TaskDataProps } from '../hooks/useTaskData';
 
-const fieldLabels: Record<string, string> = {
-  CustomerOfferCompliant: 'Assurance cliente est valide (Y/N)',
-  CommercialOfferMoreAdvantageous: 'Offre UiBank est meilleure (Y/N)',
-};
-
-const unlabeledFields = new Set(['HtmlAgentAnalysis', 'AgentAnalysis', 'RemediationAgentAnalysisResult', 'AnalysisResult', 'CommercialArgument']);
-const hiddenFieldKeys = new Set(['CustomerOfferCompliant', 'CommercialOfferMoreAdvantageous']);
-
-const InsightCard: React.FC<{ title: string; value: unknown }> = ({ title, value }) => (
-  <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-    <h2 className="text-base font-semibold text-slate-900">{title}</h2>
-    <div className="mt-4">
-      <ReadOnlyField label="" value={value} />
+const InsightCard: React.FC<{ value: unknown }> = ({ value }) => (
+  <div>
+    <div>
+      {typeof value === 'string' && looksLikeHtml(value) ? (
+        <div
+          className="prose prose-sm max-w-none text-slate-700 prose-p:my-2 prose-ul:my-2 prose-li:my-1"
+          dangerouslySetInnerHTML={{ __html: value }}
+        />
+      ) : (
+        <p className="whitespace-pre-wrap break-words text-sm text-slate-700">
+          {renderPrimitive(value)}
+        </p>
+      )}
     </div>
   </div>
 );
@@ -36,10 +36,6 @@ const InsuranceDelegationPage: React.FC<TaskDataProps> = ({
   const [comment, setComment] = useState('');
 
   const taskData = taskForm?.data || {};
-  const inputEntries = useMemo(
-    () => Object.entries(taskData).filter(([key]) => !hiddenFieldKeys.has(key)),
-    [taskData],
-  );
   const delegationAgentAnalysis =
     taskData.HtmlAgentAnalysis
     ?? taskData.AgentAnalysis
@@ -47,11 +43,6 @@ const InsuranceDelegationPage: React.FC<TaskDataProps> = ({
     ?? taskData.AnalysisResult
     ?? taskData.analysisResult;
   const commercialArgument = taskData.CommercialArgument;
-  const commercialOfferMoreAdvantageous = taskData.CommercialOfferMoreAdvantageous;
-  const filteredInputEntries = useMemo(
-    () => inputEntries.filter(([key]) => !['HtmlAgentAnalysis', 'AgentAnalysis', 'RemediationAgentAnalysisResult', 'AnalysisResult', 'analysisResult', 'CommercialArgument'].includes(key)),
-    [inputEntries],
-  );
 
   return (
     <div className="detail-page">
@@ -80,42 +71,27 @@ const InsuranceDelegationPage: React.FC<TaskDataProps> = ({
         </div>
       ) : null}
 
-      <div className="mt-6 grid grid-cols-1 gap-6">
-        <section className="rounded-2xl border border-slate-200 bg-white p-6">
-          <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+      <div className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(320px,1fr)]">
+        <section>
+          <div className="grid grid-cols-1 gap-4">
             {delegationAgentAnalysis ? (
-              <InsightCard title="HtmlAgentAnalysis" value={delegationAgentAnalysis} />
+              <InsightCard value={delegationAgentAnalysis} />
             ) : (
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5 text-sm text-slate-500">
+              <div className="text-sm text-slate-500">
                 Aucune analyse agent disponible.
               </div>
             )}
-            {(commercialArgument || commercialOfferMoreAdvantageous !== undefined) ? (
-              <InsightCard
-                title="Avantage UiAssur"
-                value={commercialArgument || (commercialOfferMoreAdvantageous ? 'L’offre UiAssur est plus avantageuse.' : 'L’offre UiAssur n’est pas plus avantageuse.')}
-              />
+            {commercialArgument ? (
+              <InsightCard value={commercialArgument} />
             ) : (
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5 text-sm text-slate-500">
-                Aucun avantage UiAssur disponible.
+              <div className="text-sm text-slate-500">
+                Aucun argument commercial disponible.
               </div>
             )}
           </div>
-
-          {filteredInputEntries.length ? (
-            <div className="grid grid-cols-1 gap-4">
-              {filteredInputEntries.map(([key, value]) => (
-                <ReadOnlyField
-                  key={key}
-                  label={unlabeledFields.has(key) ? '' : (fieldLabels[key] || key)}
-                  value={value}
-                />
-              ))}
-            </div>
-          ) : null}
         </section>
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-6">
+        <section className="rounded-2xl border border-slate-200 bg-white p-6 h-fit">
           <label className="block text-sm font-medium text-slate-700" htmlFor="task-comment">
             Commentaire
           </label>

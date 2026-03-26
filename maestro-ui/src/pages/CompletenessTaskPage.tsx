@@ -4,7 +4,6 @@ import { formatDate, resolvePreviewMimeType, toAbsoluteDocumentUrl } from '../ut
 import { casesService, type CaseDetail } from '../services/cases';
 import { useDocumentViewer } from '../hooks/useDocumentViewer';
 import DocumentViewer from '../components/CaseDetail/DocumentViewer';
-import ReadOnlyField from '../components/ReadOnlyField';
 import type { TaskDataProps } from '../hooks/useTaskData';
 
 // ---------------------------------------------------------------------------
@@ -248,20 +247,16 @@ const CompletenessTaskPage: React.FC<TaskDataProps> = ({
         <section className="rounded-2xl border border-slate-200 bg-white p-6 h-fit">
           {agentAnalysis ? (
             <>
-              <div className="rounded-2xl border border-slate-200 bg-slate-50" style={{ padding: '8px' }}>
-                <div className="flex h-12 items-center">
-                  <h2 className="text-lg font-semibold text-cyan-700">Conclusions de l'Agent IA</h2>
-                </div>
-                <div className="h-2" aria-hidden="true" />
-                <div>
-                  <ReadOnlyField label="" value={agentAnalysis} />
-                </div>
-              </div>
-              <div className="h-[200px]" aria-hidden="true" />
+              <h2 className="text-lg font-semibold text-cyan-700">Conclusions de l'Agent IA</h2>
+              <div
+                className="prose prose-sm max-w-none text-slate-700 prose-p:my-2 prose-ul:my-2 prose-li:my-1"
+                style={{ marginTop: '20px', width: '85%', marginLeft: 'auto', marginRight: 'auto' }}
+                dangerouslySetInnerHTML={{ __html: agentAnalysis }}
+              />
             </>
           ) : null}
 
-          <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '12px', alignItems: 'center' }}>
+          <div style={{ marginTop: '32px', display: 'flex', flexDirection: 'column', gap: '12px', alignItems: 'center' }}>
             <button
               type="button"
               onClick={() => handleComplete('AnalyzeCompleteness')}

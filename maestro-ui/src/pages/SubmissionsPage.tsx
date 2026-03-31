@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { AlertTriangle, Clock3, Filter, Search, ShieldCheck } from 'lucide-react';
 import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { casesService, type CaseListItem } from '../services/cases';
+import CreditChatbot from '../components/CreditChatbot';
 
 type GroupKey = 'running' | 'completed' | 'faulted';
 
@@ -394,6 +395,7 @@ const SubmissionsPage: React.FC = () => {
           </ResponsiveContainer>
         </div>
       </div>
+      <CreditChatbot />
     </div>
   );
 };
